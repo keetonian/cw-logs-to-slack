@@ -11,11 +11,6 @@ import slack
 LOG = lambdalogging.getLogger(__name__)
 
 
-def interact_with_slack(event, context):
-    """Lambda function handler."""
-    LOG.info('Received event: %s', event)
-
-
 def logs_to_slack(event, context):
     """Lambda function handler."""
     LOG.info('Received event: %s', event)

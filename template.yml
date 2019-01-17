@@ -23,10 +23,13 @@ Parameters:
     Description: Log level for Lambda function logging, e.g., ERROR, INFO, DEBUG, etc
     Default: INFO
   SlackUrl:
+    Description: Webhook URL for integration with Slack
     Type: String
   LogGroupName:
+    Description: Log group to listen to (has to be in same account and region)
     Type: String
   FilterPattern:
+    Description: Pattern for filtering log events
     Type: String
     Default: ERROR
 
@@ -55,18 +58,6 @@ Resources:
            FilterPattern: !Ref FilterPattern
            LogGroupName: !Ref LogGroupName
 
-  SlackInteractive:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/
-      Handler: handlers.interact_with_slack
-      Events:
-        InteractEvent:
-          Type: Api
-          Properties:
-            Path: /slack
-            Method: post
-
 Outputs:
   LogsToSlackName:
     Description: "Lambda Function Name"
@@ -74,6 +65,3 @@ Outputs:
   LogsToSlackArn:
     Description: "Lambda Function ARN"
     Value: !GetAtt LogsToSlack.Arn
-  ApiURL:
-    Description: "API URL"
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'
