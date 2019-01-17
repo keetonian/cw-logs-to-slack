@@ -4,14 +4,13 @@ Transform: AWS::Serverless-2016-10-31
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: cw-logs-to-slack
-    Description: This serverless application... TODO
+    Description: This serverless application tries to do all you'd want with cw logs from slack
     Author: Keeton Hodgson
-    # SPDX License Id, e.g., MIT, MIT-0, Apache-2.0. See https://spdx.org/licenses for more details
-    SpdxLicenseId: TODO
+    SpdxLicenseId: MIT
     # paths are relative to .aws-sam/build directory
     LicenseUrl: ../../LICENSE
     ReadmeUrl: ../../README.md
-    Labels: [serverless]
+    Labels: [serverless,slack,CloudWatch,logs]
     HomePageUrl: https://github.com/keetonian/cw-logs-to-slack
     # Update the semantic version and run sam publish to publish a new version of your app
     SemanticVersion: 0.0.1
@@ -23,34 +22,58 @@ Parameters:
     Type: String
     Description: Log level for Lambda function logging, e.g., ERROR, INFO, DEBUG, etc
     Default: INFO
+  SlackUrl:
+    Type: String
+  LogGroupName:
+    Type: String
+  FilterPattern:
+    Type: String
+    Default: ERROR
+
+Globals:
+  Function:
+    Runtime: python3.7
+    Tracing: Active
+    Timeout: 60
+    Environment:
+      Variables:
+        LOG_LEVEL: !Ref LogLevel
 
 Resources:
-  MyFunction:
+  LogsToSlack:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: myfunction.handler
-      Runtime: python3.7
-      Tracing: Active
-      Timeout: 60
+      Handler: handlers.logs_to_slack
       Environment:
         Variables:
-          LOG_LEVEL: !Ref LogLevel
-          TABLE_NAME: !Ref MyTable
+          SLACK_URL: !Ref SlackUrl
+      Events:
+       ErrorLogEvent:
+         Type: CloudWatchLogs
+         Properties:
+           FilterPattern: !Ref FilterPattern
+           LogGroupName: !Ref LogGroupName
 
-  MyTable:
-    Type: AWS::Serverless::SimpleTable
+  SlackInteractive:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.interact_with_slack
+      Events:
+        InteractEvent:
+          Type: Api
+          Properties:
+            Path: /slack
+            Method: post
 
 Outputs:
-  MyFunctionName:
+  LogsToSlackName:
     Description: "Lambda Function Name"
-    Value: !Ref MyFunction
-  MyFunctionArn:
+    Value: !Ref LogsToSlack
+  LogsToSlackArn:
     Description: "Lambda Function ARN"
-    Value: !GetAtt MyFunction.Arn
-  MyTableName:
-    Description: "Table Name"
-    Value: !Ref MyTable
-  MyTableArn:
-    Description: "Table ARN"
-    Value: !GetAtt MyTable.Arn
+    Value: !GetAtt LogsToSlack.Arn
+  ApiURL:
+    Description: "API URL"
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'
