@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: cw-logs-to-slack
+    Description: This serverless application... TODO
+    Author: Keeton Hodgson
+    # SPDX License Id, e.g., MIT, MIT-0, Apache-2.0. See https://spdx.org/licenses for more details
+    SpdxLicenseId: TODO
+    # paths are relative to .aws-sam/build directory
+    LicenseUrl: ../../LICENSE
+    ReadmeUrl: ../../README.md
+    Labels: [serverless]
+    HomePageUrl: https://github.com/keetonian/cw-logs-to-slack
+    # Update the semantic version and run sam publish to publish a new version of your app
+    SemanticVersion: 0.0.1
+    # best practice is to use git tags for each release and link to the version tag as your source code URL
+    SourceCodeUrl: https://github.com/keetonian/cw-logs-to-slack/tree/0.0.1
+
+Parameters:
+  LogLevel:
+    Type: String
+    Description: Log level for Lambda function logging, e.g., ERROR, INFO, DEBUG, etc
+    Default: INFO
+
+Resources:
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: myfunction.handler
+      Runtime: python3.7
+      Tracing: Active
+      Timeout: 60
+      Environment:
+        Variables:
+          LOG_LEVEL: !Ref LogLevel
+          TABLE_NAME: !Ref MyTable
+
+  MyTable:
+    Type: AWS::Serverless::SimpleTable
+
+Outputs:
+  MyFunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref MyFunction
+  MyFunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt MyFunction.Arn
+  MyTableName:
+    Description: "Table Name"
+    Value: !Ref MyTable
+  MyTableArn:
+    Description: "Table ARN"
+    Value: !GetAtt MyTable.Arn
