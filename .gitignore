@@ -252,5 +252,8 @@ $RECYCLE.BIN/
 # SAM CLI build dir
 .aws-sam
 
+# packaged template
+packaged.yml
+
 # We're using pipenv so any requirements.txt files are auto-generated and should be ignored by git
 requirements.txt

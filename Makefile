@@ -2,6 +2,7 @@ SHELL := /bin/sh
 PY_VERSION := 3.7
 
 # Required environment variables (user must override)
+OUTPUT_TEMPLATE_FILE = packaged.yml
 
 # S3 bucket used for packaging SAM templates
 PACKAGE_BUCKET ?= your-bucket-here
@@ -28,6 +29,9 @@ bootstrap:
 	pipenv lock
 	pipenv sync --dev
 
+clean:
+	rm $(OUTPUT_TEMPLATE_FILE)
+
 # used by CI build to install dependencies
 init:
 	$(PYTHON) -m $(PIP) install pipenv --user
@@ -43,5 +47,8 @@ deploy: lint
 undeploy:
 	pipenv run aws cloudformation delete-stack --stack-name $(STACK_NAME)
 
+package: lint
+	pipenv run sam package --template-file template.yml --s3-bucket ${PACKAGE_BUCKET} --output-template-file $(OUTPUT_TEMPLATE_FILE)
+
 publish: package
-	pipenv run sam publish --template template.yml
+	pipenv run sam publish --template $(OUTPUT_TEMPLATE_FILE)
