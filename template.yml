@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: cw-logs-to-slack
-    Description: This serverless application tries to do all you'd want with cw logs from slack
+    Description: Filters CloudWatch logs and publishes them to Slack
     Author: Keeton Hodgson
     SpdxLicenseId: MIT
     # paths are relative to .aws-sam/build directory
