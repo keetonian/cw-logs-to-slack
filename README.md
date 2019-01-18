@@ -33,12 +33,15 @@ CloudWatch logs allow you to filter logs based on a pattern. For more informatio
 1. `SlackUrl` (required) - Webhook URL for integration with Slack
 1. `LogGroupName` (required) - Log group to listen to (has to be in same account and region)
 1. `FilterPattern` (optional) - Pattern for filtering log events. Default: ERROR
+1. `OnlySendLogMessage` (optional) - Option to only send log message instead of all message, id, and timestamp information. Default: False. Values: False, True
 1. `LogLevel` (optional) - Log level for Lambda function logging, e.g., ERROR, INFO, DEBUG, etc. Default: INFO
 
 ## App Outputs
 
-1. `LogsToSlackName` - Lambda function name.
-1. `LogsToSlackArn` - Lambda function ARN.
+1. `LogsToLambdaName` - Log Lambda Function Name
+1. `LogsToLambdaArn` - Log Lambda Function ARN
+1. `LambdaToSlackName` - Slack Lambda Function Name
+1. `LambdaToSlackArn` - Slack Lambda Function ARN
 
 ## License Summary
 

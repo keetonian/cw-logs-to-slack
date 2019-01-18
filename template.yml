@@ -13,9 +13,9 @@ Metadata:
     Labels: [serverless,slack,CloudWatch,logs]
     HomePageUrl: https://github.com/keetonian/cw-logs-to-slack
     # Update the semantic version and run sam publish to publish a new version of your app
-    SemanticVersion: 0.0.1
+    SemanticVersion: 1.0.0
     # best practice is to use git tags for each release and link to the version tag as your source code URL
-    SourceCodeUrl: https://github.com/keetonian/cw-logs-to-slack/tree/0.0.1
+    SourceCodeUrl: https://github.com/keetonian/cw-logs-to-slack/tree/1.0.0
 
 Parameters:
   LogLevel:
@@ -32,36 +32,54 @@ Parameters:
     Description: Pattern for filtering log events
     Type: String
     Default: ERROR
-
-Globals:
-  Function:
-    Runtime: python3.7
-    Tracing: Active
-    Timeout: 60
-    Environment:
-      Variables:
-        LOG_LEVEL: !Ref LogLevel
+  OnlySendLogMessage:
+    Type: String
+    Default: 'False'
+    Description: By default, this applicaiton will send the log message, id, and timestamp, unless this is set to True
+    AllowedValues: ['True','False']
 
 Resources:
-  LogsToSlack:
-    Type: AWS::Serverless::Function
+  cwlogstolambda:
+    Type: AWS::Serverless::Application
     Properties:
-      CodeUri: src/
-      Handler: handlers.logs_to_slack
-      Environment:
-        Variables:
-          SLACK_URL: !Ref SlackUrl
-      Events:
-       ErrorLogEvent:
-         Type: CloudWatchLogs
-         Properties:
-           FilterPattern: !Ref FilterPattern
-           LogGroupName: !Ref LogGroupName
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:289559741701:applications/cw-logs-to-lambda
+        SemanticVersion: 0.0.1
+      Parameters: 
+        # Name of the function to which this application will send log messages
+        DestinationFunctionName: !GetAtt lambdatoslack.Outputs.LambdaToSlackName
+        # Pattern for filtering log events
+        FilterPattern: !Ref FilterPattern
+        # Log group to listen to (has to be in same account and region)
+        LogGroupName: !Ref LogGroupName
+        # Log level for Lambda function logging, e.g., ERROR, INFO, DEBUG, etc
+        LogLevel: !Ref LogLevel
+        # By default, this function will send the log message, id, and timestamp, unless this is set to True
+        OnlySendLogMessage: !Ref OnlySendLogMessage
+
+  lambdatoslack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:289559741701:applications/lambda-to-slack
+        SemanticVersion: 0.0.1
+      Parameters: 
+        # Log level for Lambda function logging, e.g., ERROR, INFO, DEBUG, etc
+        LogLevel: !Ref LogLevel
+        # Webhook URL for integration with Slack
+        SlackUrl: !Ref SlackUrl  
+
 
 Outputs:
-  LogsToSlackName:
-    Description: "Lambda Function Name"
-    Value: !Ref LogsToSlack
-  LogsToSlackArn:
-    Description: "Lambda Function ARN"
-    Value: !GetAtt LogsToSlack.Arn
+  LogsToLambdaName:
+    Description: "Log Lambda Function Name"
+    Value: !GetAtt cwlogstolambda.Outputs.LogsToLambdaName
+  LogsToLambdaArn:
+    Description: "Log Lambda Function ARN"
+    Value: !GetAtt cwlogstolambda.Outputs.LogsToLambdaArn
+  LambdaToSlackName:
+    Description: "Slack Lambda Function Name"
+    Value: !GetAtt lambdatoslack.Outputs.LambdaToSlackName
+  LambdaToSlackArn:
+    Description: "Slack Lambda Function ARN"
+    Value: !GetAtt lambdatoslack.Outputs.LambdaToSlackArn
