@@ -49,4 +49,4 @@ This code is made available under the MIT license. See the LICENSE file.
 
 ## Releases
 
-If you would like to see a version of this application that uses code instead of other applications, see the [0.0.1 Release Tag](https://github.com/keetonian/cw-logs-to-slack/tree/0.0.1)
+If you would like to see a version of this application that uses code instead of other applications, see the [0.0.1 Release](https://github.com/keetonian/cw-logs-to-slack/tree/0.0.1).
